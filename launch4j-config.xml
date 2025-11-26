@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>build\libs\MelikshotRoulette-1.0-SNAPSHOT.jar
+  <outfile>MelikshotRoulette2D.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>C:\Users\DELL\Downloads\meliksah.ico</icon>
+  <jre>
+    <path>%JAVA_HOME%;%PATH%</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>false</requires64Bit>
+    <minVersion>17.0.0</minVersion>
+    <maxVersion></maxVersion>
+    <initialHeapSize>256</initialHeapSize>
+    <maxHeapSize>1024</maxHeapSize>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.1</fileVersion>
+    <txtFileVersion>1.0.1</txtFileVersion>
+    <fileDescription>Maded By Erdalberk15</fileDescription>
+    <copyright>Creative Commons</copyright>
+    <productVersion>1.0.0.1</productVersion>
+    <txtProductVersion>1.0.1</txtProductVersion>
+    <productName>MelikshotRoulette2D</productName>
+    <companyName>Erdalberk15</companyName>
+    <internalName>Erdalberk15</internalName>
+    <originalFilename>MelikshotRoulette2D.exe</originalFilename>
+    <trademarks></trademarks>
+    <language>ENGLISH_US</language>
+  </versionInfo>
+</launch4jConfig>

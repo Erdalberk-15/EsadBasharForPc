@@ -2,7 +2,8 @@ package com.melikshotroulette.melikshotroulette.models
 
 enum class GameMode {
     SINGLE_PLAYER,
-    TWO_PLAYER
+    TWO_PLAYER,
+    FOUR_PLAYER
 }
 
 enum class ItemType {
@@ -108,7 +109,13 @@ enum class ShootTarget {
     OPPONENT
 }
 
-class GameState(val mode: GameMode, player1Character: String = "Player 1", player2Character: String = "Player 2") {
+class GameState(
+    val mode: GameMode, 
+    player1Character: String = "Player 1", 
+    player2Character: String = "Player 2",
+    player3Character: String = "Player 3",
+    player4Character: String = "Player 4"
+) {
     var currentChamberIndex: Int = 0
     var currentPlayerIndex: Int = 0
     var roundNumber: Int = 1
@@ -118,11 +125,16 @@ class GameState(val mode: GameMode, player1Character: String = "Player 1", playe
     var doubleDamageActive: Boolean = false
     
     init {
-        initializePlayers(player1Character, player2Character)
+        initializePlayers(player1Character, player2Character, player3Character, player4Character)
         loadChambers()
     }
     
-    private fun initializePlayers(player1Character: String, player2Character: String) {
+    private fun initializePlayers(
+        player1Character: String, 
+        player2Character: String,
+        player3Character: String,
+        player4Character: String
+    ) {
         players.clear()
         when (mode) {
             GameMode.SINGLE_PLAYER -> {
@@ -131,6 +143,12 @@ class GameState(val mode: GameMode, player1Character: String = "Player 1", playe
             GameMode.TWO_PLAYER -> {
                 players.add(Player(player1Character))
                 players.add(Player(player2Character))
+            }
+            GameMode.FOUR_PLAYER -> {
+                players.add(Player(player1Character))
+                players.add(Player(player2Character))
+                players.add(Player(player3Character))
+                players.add(Player(player4Character))
             }
         }
     }
@@ -160,10 +178,18 @@ class GameState(val mode: GameMode, player1Character: String = "Player 1", playe
     fun getCurrentPlayer(): Player = players[currentPlayerIndex]
     
     fun getOpponentPlayer(): Player? {
-        if (mode == GameMode.TWO_PLAYER) {
-            return players[(currentPlayerIndex + 1) % 2]
+        return when (mode) {
+            GameMode.TWO_PLAYER -> players[(currentPlayerIndex + 1) % 2]
+            GameMode.FOUR_PLAYER -> {
+                // In 4-player mode, target the next player in rotation
+                players[(currentPlayerIndex + 1) % players.size]
+            }
+            else -> null
         }
-        return null
+    }
+    
+    fun getNextPlayer(): Player {
+        return players[(currentPlayerIndex + 1) % players.size]
     }
     
     fun getCurrentChamber(): Boolean = chambers[currentChamberIndex]
@@ -176,10 +202,23 @@ class GameState(val mode: GameMode, player1Character: String = "Player 1", playe
     
     fun getEmptyCount(): Int = chambers.count { !it }
     
+    var targetPlayerIndex: Int? = null // For 4-player mode to specify target
+    
     fun shoot(target: ShootTarget): ShootResult {
         val isLoaded = getCurrentChamber()
         val shooter = getCurrentPlayer()
-        val targetPlayer = if (target == ShootTarget.SELF) shooter else getOpponentPlayer()!!
+        val targetPlayer = if (target == ShootTarget.SELF) {
+            shooter
+        } else {
+            // Use specified target if set (for 4-player mode), otherwise use next player
+            if (targetPlayerIndex != null) {
+                val player = players[targetPlayerIndex!!]
+                targetPlayerIndex = null // Reset after use
+                player
+            } else {
+                getOpponentPlayer()!!
+            }
+        }
         
         // Log round information
         println("\n========== ROUND $roundNumber ==========")
@@ -246,7 +285,7 @@ class GameState(val mode: GameMode, player1Character: String = "Player 1", playe
         // If player shot themselves with empty chamber, they keep their turn
         val keepTurn = lastResult == ShootResult.SELF_SAFE
         
-        if (mode == GameMode.TWO_PLAYER && !doubleTriggerActive && !keepTurn) {
+        if ((mode == GameMode.TWO_PLAYER || mode == GameMode.FOUR_PLAYER) && !doubleTriggerActive && !keepTurn) {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size
         }
         

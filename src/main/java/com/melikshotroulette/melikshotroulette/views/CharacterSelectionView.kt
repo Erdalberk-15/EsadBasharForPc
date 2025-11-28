@@ -15,16 +15,20 @@ import javafx.scene.text.FontWeight
 
 class CharacterSelectionView(
     private val mode: GameMode,
-    private val onCharactersSelected: (String, String) -> Unit,
+    private val onCharactersSelected: (List<String>) -> Unit,
     private val onBack: () -> Unit
 ) {
     val scene: Scene
-    private var player1Character: String? = null
-    private var player2Character: String? = null
+    private val selectedCharacters = mutableListOf<String>()
     private val characters = listOf("Kedullah", "FINAL BOSS", "Nokia", "Benji", "Anne Terliği", "Amongus")
     private val characterImages = listOf("cha_1.png", "cha_2.png", "cha_3.png", "cha_4.png", "cha_5.png", "cha_6.png")
     
     private var currentPlayer = 1
+    private val maxPlayers = when (mode) {
+        GameMode.SINGLE_PLAYER -> 1
+        GameMode.TWO_PLAYER -> 2
+        GameMode.FOUR_PLAYER -> 4
+    }
     private val titleLabel: Label
     private val characterBoxes = mutableListOf<VBox>()
     
@@ -151,10 +155,10 @@ class CharacterSelectionView(
         }
         
         box.setOnMouseExited {
-            val borderColor = when {
-                player1Character == name -> "#ff8800"
-                player2Character == name -> "#00aaff"
-                else -> "#444444"
+            val borderColor = if (selectedCharacters.contains(name)) {
+                getPlayerColor(selectedCharacters.indexOf(name))
+            } else {
+                "#444444"
             }
             box.style = """
                 -fx-background-color: #2a2a2a;
@@ -168,30 +172,39 @@ class CharacterSelectionView(
         return box
     }
     
+    private fun getPlayerColor(playerIndex: Int): String {
+        return when (playerIndex) {
+            0 -> "#ff8800" // Player 1 - Orange
+            1 -> "#00aaff" // Player 2 - Blue
+            2 -> "#00ff00" // Player 3 - Green
+            3 -> "#ff00ff" // Player 4 - Magenta
+            else -> "#444444"
+        }
+    }
+    
+    private fun getPlayerName(playerIndex: Int): String {
+        return "PLAYER ${playerIndex + 1}"
+    }
+    
     private fun selectCharacter(character: String, index: Int) {
-        if (currentPlayer == 1) {
-            player1Character = character
-            
-            // Highlight selected character
-            updateCharacterBoxBorder(index, "#ff8800")
-            
-            if (mode == GameMode.TWO_PLAYER) {
-                // Move to player 2 selection
-                currentPlayer = 2
-                titleLabel.text = "PLAYER 2 - SELECT YOUR CHARACTER"
-                titleLabel.textFill = Color.web("#00aaff")
-            } else {
-                // Single player mode - start game immediately
-                onCharactersSelected(character, "AI")
-            }
+        // Don't allow selecting the same character twice
+        if (selectedCharacters.contains(character)) {
+            return
+        }
+        
+        selectedCharacters.add(character)
+        
+        // Highlight selected character
+        updateCharacterBoxBorder(index, getPlayerColor(selectedCharacters.size - 1))
+        
+        if (selectedCharacters.size < maxPlayers) {
+            // Move to next player selection
+            currentPlayer++
+            titleLabel.text = "${getPlayerName(currentPlayer - 1)} - SELECT YOUR CHARACTER"
+            titleLabel.textFill = Color.web(getPlayerColor(currentPlayer - 1))
         } else {
-            player2Character = character
-            
-            // Highlight selected character
-            updateCharacterBoxBorder(index, "#00aaff")
-            
-            // Both players selected, start game
-            onCharactersSelected(player1Character!!, player2Character!!)
+            // All players selected, start game
+            onCharactersSelected(selectedCharacters.toList())
         }
     }
     

@@ -2,9 +2,7 @@ package com.melikshotroulette.melikshotroulette
 
 import com.melikshotroulette.melikshotroulette.models.*
 import com.melikshotroulette.melikshotroulette.utils.SoundManager
-import com.melikshotroulette.melikshotroulette.views.CharacterSelectionView
-import com.melikshotroulette.melikshotroulette.views.GameView
-import com.melikshotroulette.melikshotroulette.views.MainMenuView
+import com.melikshotroulette.melikshotroulette.views.*
 import javafx.animation.PauseTransition
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -19,6 +17,8 @@ import javafx.util.Duration
 class GameController(private val stage: Stage) {
     private var gameState: GameState? = null
     private var gameView: GameView? = null
+    private var fourPlayerGameView: FourPlayerGameView? = null
+    private var previousScene: Scene? = null
     
     init {
         stage.title = "Melikshot Roulette 2D"
@@ -41,17 +41,32 @@ class GameController(private val stage: Stage) {
         val menuView = MainMenuView(
             onSinglePlayer = { showCharacterSelection(GameMode.SINGLE_PLAYER) },
             onTwoPlayer = { showCharacterSelection(GameMode.TWO_PLAYER) },
+            onFourPlayer = { showCharacterSelection(GameMode.FOUR_PLAYER) },
+            onUpdateLogs = { showUpdateLogs() },
             onExit = { showExitScreen() }
         )
         stage.scene = menuView.scene
         stage.show()
     }
     
+    private fun showUpdateLogs() {
+        val updateLogsView = UpdateLogsView(
+            onBack = { showMainMenu() }
+        )
+        stage.scene = updateLogsView.scene
+        stage.isFullScreen = true
+    }
+    
     private fun showCharacterSelection(mode: GameMode) {
         val charSelectionView = CharacterSelectionView(
             mode = mode,
-            onCharactersSelected = { player1Char, player2Char ->
-                startGame(mode, player1Char, player2Char)
+            onCharactersSelected = { characters ->
+                when (characters.size) {
+                    1 -> startGame(mode, characters[0], "AI")
+                    2 -> startGame(mode, characters[0], characters[1])
+                    4 -> startGame(mode, characters[0], characters[1], characters[2], characters[3])
+                    else -> startGame(mode, characters[0], "AI")
+                }
             },
             onBack = { showMainMenu() }
         )
@@ -128,27 +143,53 @@ class GameController(private val stage: Stage) {
         }
     }
     
-    private fun startGame(mode: GameMode, player1Character: String, player2Character: String) {
-        gameState = GameState(mode, player1Character, player2Character)
-        gameView = GameView(gameState!!, this)
-        stage.scene = gameView!!.scene
+    private fun startGame(
+        mode: GameMode, 
+        player1Character: String, 
+        player2Character: String,
+        player3Character: String = "Player 3",
+        player4Character: String = "Player 4"
+    ) {
+        gameState = GameState(mode, player1Character, player2Character, player3Character, player4Character)
+        
+        if (mode == GameMode.FOUR_PLAYER) {
+            fourPlayerGameView = FourPlayerGameView(gameState!!, this)
+            stage.scene = fourPlayerGameView!!.scene
+        } else {
+            gameView = GameView(gameState!!, this)
+            stage.scene = gameView!!.scene
+        }
+        
         stage.isFullScreen = true
     }
     
     fun handleShoot(target: ShootTarget) {
         val state = gameState ?: return
-        val view = gameView ?: return
         
         val result = state.shoot(target)
-        view.showShootResult(result)
+        
+        // Show result in appropriate view
+        if (state.mode == GameMode.FOUR_PLAYER) {
+            fourPlayerGameView?.showShootResult(result)
+        } else {
+            gameView?.showShootResult(result)
+        }
         
         val pause = PauseTransition(Duration.millis(2000.0))
         pause.setOnFinished {
             if (state.isGameOver()) {
-                view.showGameOver()
+                if (state.mode == GameMode.FOUR_PLAYER) {
+                    fourPlayerGameView?.showGameOver()
+                } else {
+                    gameView?.showGameOver()
+                }
             } else {
                 state.nextTurn(result)
-                view.updateUI()
+                if (state.mode == GameMode.FOUR_PLAYER) {
+                    fourPlayerGameView?.updateUI()
+                } else {
+                    gameView?.updateUI()
+                }
             }
         }
         pause.play()
@@ -161,5 +202,31 @@ class GameController(private val stage: Stage) {
     
     fun backToMenu() {
         showMainMenu()
+    }
+    
+    fun showPlayerTargetSelection() {
+        val state = gameState ?: return
+        
+        // Save current scene
+        previousScene = stage.scene
+        
+        val targetSelectionView = PlayerTargetSelectionView(
+            gameState = state,
+            onPlayerSelected = { targetIndex ->
+                // Set target and return to game
+                state.targetPlayerIndex = targetIndex
+                stage.scene = previousScene
+                stage.isFullScreen = true
+                handleShoot(ShootTarget.OPPONENT)
+            },
+            onCancel = {
+                // Return to game without shooting
+                stage.scene = previousScene
+                stage.isFullScreen = true
+            }
+        )
+        
+        stage.scene = targetSelectionView.scene
+        stage.isFullScreen = true
     }
 }

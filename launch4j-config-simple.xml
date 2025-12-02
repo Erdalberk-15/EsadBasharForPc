@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>build\libs\MelikshotRoulette-1.0-SNAPSHOT.jar</jar>
-  <outfile>MelikshotRoulette2D.exe</outfile>
+  <jar>build\libs\EsadBashar-1.0-SNAPSHOT.jar</jar>
+  <outfile>EsadBashar.exe</outfile>
   <errTitle>Error</errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>

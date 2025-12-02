@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>build\libs\MelikshotRoulette-1.0-SNAPSHOT.jar</jar>
-  <outfile>C:\Users\DELL\Desktop\MelikshotRoulette.exe</outfile>
+  <jar>build\libs\EsadBashar-1.0-SNAPSHOT.jar</jar>
+  <outfile>C:\Users\DELL\Desktop\EsadBashar.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -24,16 +24,16 @@
     <maxHeapSize>1024</maxHeapSize>
   </jre>
   <versionInfo>
-    <fileVersion>1.0.0.2</fileVersion>
-    <txtFileVersion>1.0.2</txtFileVersion>
+    <fileVersion>1.0.0.3</fileVersion>
+    <txtFileVersion>1.0.3</txtFileVersion>
     <fileDescription>Maded By Erdalberk15</fileDescription>
     <copyright>Creative Commons</copyright>
-    <productVersion>1.0.0.2</productVersion>
-    <txtProductVersion>1.0.2</txtProductVersion>
-    <productName>MelikshotRoulette2D</productName>
+    <productVersion>1.0.0.3</productVersion>
+    <txtProductVersion>1.0.3</txtProductVersion>
+    <productName>EsadBashar</productName>
     <companyName>Erdalberk15</companyName>
     <internalName>Erdalberk15</internalName>
-    <originalFilename>MelikshotRoulette2D.exe</originalFilename>
+    <originalFilename>EsadBashar.exe</originalFilename>
     <trademarks></trademarks>
     <language>ENGLISH_US</language>
   </versionInfo>

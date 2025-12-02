@@ -1,4 +1,4 @@
-package com.melikshotroulette.melikshotroulette
+package com.esadbashar.esadbashar
 
 import javafx.application.Platform
 import javafx.scene.control.Alert

@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm") version "1.9.24"
 }
 
-group = "com.melikshotroulette"
+group = "com.esadbashar"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -26,8 +26,8 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainClass.set("com.melikshotroulette.melikshotroulette.MainKt")
-    applicationName = "MelikshotRoulette"
+    mainClass.set("com.esadbashar.esadbashar.MainKt")
+    applicationName = "EsadBashar"
 }
 
 javafx {
@@ -57,11 +57,11 @@ tasks.withType<Test> {
 // Create fat JAR with all dependencies
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "com.melikshotroulette.melikshotroulette.MainKt"
+        attributes["Main-Class"] = "com.esadbashar.esadbashar.MainKt"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    archiveBaseName.set("MelikshotRoulette")
+    archiveBaseName.set("EsadBashar")
 }
 
 tasks.named<JavaExec>("run") {
@@ -70,14 +70,14 @@ tasks.named<JavaExec>("run") {
 }
 
 jlink {
-    imageZip.set(layout.buildDirectory.file("/distributions/MelikshotRoulette-${javafx.platform.classifier}.zip"))
+    imageZip.set(layout.buildDirectory.file("/distributions/EsadBashar-${javafx.platform.classifier}.zip"))
     options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
     launcher {
-        name = "MelikshotRoulette"
+        name = "EsadBashar"
     }
     jpackage {
-        imageName = "MelikshotRoulette"
-        installerName = "MelikshotRoulette"
+        imageName = "EsadBashar"
+        installerName = "EsadBashar"
         appVersion = "1.0.0"
         installerOptions.addAll(listOf(
             "--win-dir-chooser",

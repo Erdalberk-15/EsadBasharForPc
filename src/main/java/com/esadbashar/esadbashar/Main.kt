@@ -31,9 +31,15 @@ class Main : Application() {
     private var windowWidth = 800.0
     private var windowHeight = 600.0
     private var lastDuplicationTime = 0L
-    private val duplicationInterval = 15_000_000_000L // 15 seconds in nanoseconds
+    private val duplicationInterval = 2_000_000_000L
     private var baseImage: Image? = null
     private var mediaPlayer: MediaPlayer? = null
+    private var countdownLabel: Label? = null
+    private var gameStartTime = 0L
+    private var imagesClickable = false
+    private var winLabel: Label? = null
+    private var winTime = 0L
+    private var gameWon = false
     
     override fun start(primaryStage: Stage) {
         // Check Java version before starting
@@ -68,6 +74,15 @@ class Main : Application() {
         
         // Create first bouncing image
         createNewBouncingImage()
+        
+        // Create countdown label
+        countdownLabel = Label("20")
+        countdownLabel?.font = Font.font(72.0)
+        countdownLabel?.textFill = Color.WHITE
+        countdownLabel?.style = "-fx-background-color: rgba(0, 0, 0, 0.7); -fx-padding: 20px;"
+        countdownLabel?.layoutX = (windowWidth / 2) - 50
+        countdownLabel?.layoutY = 50.0
+        pane.children.add(countdownLabel)
         
         // Create close button
         val closeButton = Label("X")
@@ -110,9 +125,20 @@ class Main : Application() {
             createPlaceholderImage()
         }
         
-        // Make image non-interactive (mouse events pass through)
-        imageView.isPickOnBounds = false
-        imageView.isMouseTransparent = true
+        // Set up click handler for removing image
+        imageView.isPickOnBounds = true
+        imageView.setOnMouseClicked {
+            if (imagesClickable && !gameWon) {
+                pane.children.remove(imageView)
+                bouncingImages.removeIf { it.imageView == imageView }
+                println("Image removed. Total: ${bouncingImages.size}")
+                
+                // Check if all images are removed
+                if (bouncingImages.isEmpty()) {
+                    showWinMessage()
+                }
+            }
+        }
         
         // Set random initial position
         val imgWidth = imageView.boundsInLocal.width.coerceAtLeast(1.0)
@@ -122,9 +148,9 @@ class Main : Application() {
         imageView.x = if (maxX > 0) Random.nextDouble(0.0, maxX) else 0.0
         imageView.y = if (maxY > 0) Random.nextDouble(0.0, maxY) else 0.0
         
-        // Random velocity
-        val velocityX = Random.nextDouble(2.0, 4.0) * if (Random.nextBoolean()) 1 else -1
-        val velocityY = Random.nextDouble(2.0, 4.0) * if (Random.nextBoolean()) 1 else -1
+        // Random velocity (2x faster)
+        val velocityX = Random.nextDouble(4.0, 8.0) * if (Random.nextBoolean()) 1 else -1
+        val velocityY = Random.nextDouble(4.0, 8.0) * if (Random.nextBoolean()) 1 else -1
         
         // Random color
         changeImageColor(imageView)
@@ -164,21 +190,66 @@ class Main : Application() {
         return ImageView(snapshot)
     }
     
+    private fun showWinMessage() {
+        gameWon = true
+        winTime = System.nanoTime()
+        
+        winLabel = Label("You Win!")
+        winLabel?.font = Font.font(100.0)
+        winLabel?.textFill = Color.YELLOW
+        winLabel?.style = "-fx-background-color: rgba(0, 0, 0, 0.8); -fx-padding: 40px;"
+        winLabel?.layoutX = (windowWidth / 2) - 250
+        winLabel?.layoutY = (windowHeight / 2) - 100
+        pane.children.add(winLabel)
+        
+        println("YOU WIN! Game will close in 10 seconds...")
+    }
+    
     private fun startBouncingAnimation() {
         object : AnimationTimer() {
             override fun handle(now: Long) {
+                // Check win condition timer
+                if (gameWon && winTime > 0) {
+                    val elapsedSinceWin = ((now - winTime) / 1_000_000_000L).toInt()
+                    if (elapsedSinceWin >= 10) {
+                        mediaPlayer?.stop()
+                        Platform.exit()
+                        exitProcess(0)
+                    }
+                }
+                
+                // Initialize game start time
+                if (gameStartTime == 0L) {
+                    gameStartTime = now
+                }
+                
+                // Update countdown
+                val elapsedSeconds = ((now - gameStartTime) / 1_000_000_000L).toInt()
+                val remainingSeconds = 10 - elapsedSeconds
+                
+                if (remainingSeconds > 0) {
+                    countdownLabel?.text = remainingSeconds.toString()
+                } else if (remainingSeconds == 0) {
+                    countdownLabel?.text = "GO!"
+                    imagesClickable = true
+                } else if (remainingSeconds == -1) {
+                    pane.children.remove(countdownLabel)
+                    countdownLabel = null
+                }
+                
                 // Check if it's time to duplicate
                 if (lastDuplicationTime == 0L) {
                     lastDuplicationTime = now
                 }
                 
-                if (now - lastDuplicationTime >= duplicationInterval) {
+                if (now - lastDuplicationTime >= duplicationInterval && !gameWon) {
                     createNewBouncingImage()
                     lastDuplicationTime = now
                 }
                 
-                // Update all bouncing images
-                for (i in bouncingImages.indices) {
+                // Update all bouncing images (stop if game won)
+                if (!gameWon) {
+                    for (i in bouncingImages.indices) {
                     val bouncing = bouncingImages[i]
                     val img = bouncing.imageView
                     
@@ -232,6 +303,7 @@ class Main : Application() {
                             handleCollision(bouncing, other)
                         }
                     }
+                }
                 }
             }
         }.start()

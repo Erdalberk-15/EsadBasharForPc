@@ -21,15 +21,15 @@
     <minVersion>17.0.0</minVersion>
     <maxVersion></maxVersion>
     <initialHeapSize>256</initialHeapSize>
-    <maxHeapSize>1024</maxHeapSize>
+    <maxHeapSize>4096</maxHeapSize>
   </jre>
   <versionInfo>
-    <fileVersion>1.0.0.3</fileVersion>
-    <txtFileVersion>1.0.3</txtFileVersion>
+    <fileVersion>1.0.0.1</fileVersion>
+    <txtFileVersion>1.0.1</txtFileVersion>
     <fileDescription>Maded By Erdalberk15</fileDescription>
     <copyright>Creative Commons</copyright>
-    <productVersion>1.0.0.3</productVersion>
-    <txtProductVersion>1.0.3</txtProductVersion>
+    <productVersion>1.0.0.1</productVersion>
+    <txtProductVersion>1.0.1</txtProductVersion>
     <productName>EsadBashar</productName>
     <companyName>Erdalberk15</companyName>
     <internalName>Erdalberk15</internalName>
